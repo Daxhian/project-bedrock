@@ -16,4 +16,5 @@ override.tf.json
 *__override.tf.json
 
 # Bash scripts
-destory.sh
+destroy.sh
+grading.json
