@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retailstore-config
+  namespace: default
+data:
+  DB_NAME: "retailstore"
+  CARTS_DYNAMODB_TABLE: "retailstore-carts"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retailstore-catalog-override
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: catalog-override
+  template:
+    metadata:
+      labels:
+        app: catalog-override
+    spec:
+      containers:
+      - name: catalog-service
+        image: public.ecr.aws/aws-containers/retail-store-sample-catalog:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: retailstore-config
+              key: DB_NAME
+        - name: CARTS_DYNAMODB_TABLE
+          valueFrom:
+            configMapKeyRef:
+              name: retailstore-config
+              key: CARTS_DYNAMODB_TABLE
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service-override
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: catalog-override
+  type: NodePort

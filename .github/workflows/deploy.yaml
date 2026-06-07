@@ -1,0 +1,38 @@
+name: "Production GitOps Deployment"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform-gitops:
+    name: "Deploy Production Stack"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Infrastructure Lifecycle Apply
+        run: |
+          cd terraform/environment/prod
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Target Kubernetes Manifest Kicking
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name project-bedrock-cluster
+          kubectl apply -f k8s/app-config.yaml
+          kubectl apply -f k8s/ingress.yaml

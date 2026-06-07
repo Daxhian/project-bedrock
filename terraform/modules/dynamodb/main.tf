@@ -9,6 +9,7 @@ resource "aws_dynamodb_table" "carts" {
   }
 
   tags = {
-    Name = "retailstore-carts"
+    Name    = "retailstore-carts"
+    Project = "karatu-2025-capstone"
   }
 }

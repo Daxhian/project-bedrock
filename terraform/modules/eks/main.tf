@@ -22,7 +22,8 @@ resource "aws_eks_cluster" "main" {
   ]
 
   tags = {
-    Name = var.cluster_name
+    Name    = var.cluster_name
+    Project = "karatu-2025-capstone"
   }
 }
 
@@ -105,7 +106,8 @@ resource "aws_eks_node_group" "main" {
   }
 
   tags = {
-    Name = "${var.cluster_name}-node-group"
+    Name    = "${var.cluster_name}-node-group"
+    Project = "karatu-2025-capstone"
   }
 
   lifecycle {
