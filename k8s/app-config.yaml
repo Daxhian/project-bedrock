@@ -28,16 +28,12 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: retailstore-config
-              key: DB_NAME
-        - name: CARTS_DYNAMODB_TABLE
-          valueFrom:
-            configMapKeyRef:
-              name: retailstore-config
-              key: CARTS_DYNAMODB_TABLE
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://catalog-db:3306/retailstore"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "your_db_username"  # 👈 Replace with your actual username
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "your_db_password"  # 👈 Replace with your actual password
         resources:
           limits:
             cpu: "500m"
@@ -59,3 +55,39 @@ spec:
   selector:
     app: catalog-override
   type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-db
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: project-bedrock-cluster-mysql.cmnq2su0697b.us-east-1.rds.amazonaws.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-mysql
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: project-bedrock-cluster-mysql.cmnq2su0697b.us-east-1.rds.amazonaws.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-db
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: project-bedrock-cluster-postgres.cmnq2su0697b.us-east-1.rds.amazonaws.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-postgresql
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: project-bedrock-cluster-postgres.cmnq2su0697b.us-east-1.rds.amazonaws.com

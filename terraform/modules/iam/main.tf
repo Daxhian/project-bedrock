@@ -93,3 +93,29 @@ resource "aws_iam_user_policy" "bedrock_dev_s3" {
     }]
   })
 }
+
+# ─────────────────────────────────────────
+# AWS LOAD BALANCER CONTROLLER PERMISSION PATCH
+# ─────────────────────────────────────────
+resource "aws_iam_role_policy" "lbc_network_discovery_patch" {
+  name = "lbc-network-discovery-patch"
+  # Target the exact role name from your cluster error logs
+  role = "${var.cluster_name}-lbc-role"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeAccountAttributes"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}

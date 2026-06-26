@@ -4,11 +4,12 @@ metadata:
   name: retailstore-ingress
   namespace: default
   annotations:
-    kubernetes.io/ingress.class: alb
+    # This tells AWS to make a public-facing Application Load Balancer
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
+  # This tells EKS exactly which controller should pick up this resource
+  ingressClassName: alb
   rules:
   - http:
       paths:

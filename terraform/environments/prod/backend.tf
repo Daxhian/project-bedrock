@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "project-bedrock-tfstate-491085407784"
+    bucket = "project-bedrock-tfstate-altsoe0253240"
     key    = "prod/terraform.tfstate"
     region = "us-east-1"
 
