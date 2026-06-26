@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carts-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: carts-web-app
+  template:
+    metadata:
+      labels:
+        app: carts-web-app
+    spec:
+      containers:
+      - name: carts
+        image: public.ecr.aws/aws-containers/retail-store-sample-cart:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CARTS_DYNAMODB_ENDPOINT
+          value: "http://carts-dynamodb:8000"
+        - name: CARTS_DYNAMODB_TABLE
+          value: "retailstore-carts"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carts
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: carts-web-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carts-dynamodb
+  namespace: default
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app.kubernetes.io/name: carts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-web-app
+  template:
+    metadata:
+      labels:
+        app: orders-web-app
+    spec:
+      containers:
+      - name: orders
+        image: public.ecr.aws/aws-containers/retail-store-sample-orders:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://orders-postgresql:5432/orders"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "your_db_username"  # 👈 Replace with your RDS Postgres username
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "your_db_password"  # 👈 Replace with your RDS Postgres password
+        - name: SPRING_RABBITMQ_HOST
+          value: "orders-rabbitmq"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: orders-web-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-rabbitmq
+  namespace: default
+spec:
+  ports:
+  - port: 5672
+    targetPort: 5672
+  selector:
+    app.kubernetes.io/name: orders
